@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useUIState, useActions } from "ai/rsc";
 import type { AI } from "./action";
+import style from "./page.module.css";
+import Image from "next/image";
 
 export default function Page() {
   const [inputValue, setInputValue] = useState("");
@@ -10,13 +12,27 @@ export default function Page() {
   const { submitUserMessage } = useActions<typeof AI>();
 
   return (
-    <div>
-      {
-        // View messages in UI state
-        messages.map((message) => (
-          <div key={message.id}>{message.display}</div>
-        ))
-      }
+    <main className={style.main}>
+      <div className={style.messages}>
+        {messages.length === 0 ? (
+          <div className={style.banner}>
+            <div>
+              <Image src="/brushy.gif" alt="Brushy" width={100} height={100} />
+            </div>
+            <div>Ask me about artists and artworks on Artsy</div>
+          </div>
+        ) : (
+          // View messages in UI state
+          messages.map((message) => {
+            console.log({ message });
+            return (
+              <div key={message.id} className={style.message}>
+                {message.display}
+              </div>
+            );
+          })
+        )}
+      </div>
 
       <form
         onSubmit={async (e) => {
@@ -42,13 +58,14 @@ export default function Page() {
         }}
       >
         <input
-          placeholder="Send a message..."
+          className={style.userInput}
+          placeholder="Chat with Artsy"
           value={inputValue}
           onChange={(event) => {
             setInputValue(event.target.value);
           }}
         />
       </form>
-    </div>
+    </main>
   );
 }
