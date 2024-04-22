@@ -1,55 +1,54 @@
 "use client";
 
-import Image from "next/image";
-import { useChat } from "ai/react";
-import styles from "./page.module.css";
-import { useRef, useEffect } from "react";
+import { useState } from "react";
+import { useUIState, useActions } from "ai/rsc";
+import type { AI } from "./action";
 
-export default function Chat() {
-  const { messages, input, handleInputChange, handleSubmit } = useChat();
-  const scrollMeRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (scrollMeRef.current) {
-      scrollMeRef.current.scrollIntoView();
-    }
-  }, [messages]);
+export default function Page() {
+  const [inputValue, setInputValue] = useState("");
+  const [messages, setMessages] = useUIState<typeof AI>();
+  const { submitUserMessage } = useActions<typeof AI>();
 
   return (
-    <main className={styles.main}>
-      <div className={styles.messages}>
-        {messages.length === 0 ? (
-          <div className={styles.banner}>
-            <div>
-              <Image src="/brushy.gif" alt="Brushy" width={100} height={100} />
-            </div>
-            <div>Ask me about artists and artworks on Artsy</div>
-          </div>
-        ) : (
-          <>
-            {messages.map((m) => (
-              <div key={m.id} className={styles.message}>
-                <div className={styles.role}>
-                  {m.role === "user" ? "You" : "Artsy"}
-                </div>
-                <div className={styles.content}>{m.content}</div>
-              </div>
-            ))}
+    <div>
+      {
+        // View messages in UI state
+        messages.map((message) => (
+          <div key={message.id}>{message.display}</div>
+        ))
+      }
 
-            <div ref={scrollMeRef}>
-              {/* invisible element that will be scrolled into view as `messages` gets updated */}
-            </div>
-          </>
-        )}
-      </div>
-      <form onSubmit={handleSubmit} className={styles.form}>
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+
+          // Add user message to UI state
+          setMessages((currentMessages) => [
+            ...currentMessages,
+            {
+              id: Date.now(),
+              display: <div>{inputValue}</div>,
+            },
+          ]);
+
+          // Submit and get response message
+          const responseMessage = await submitUserMessage(inputValue);
+          setMessages((currentMessages) => [
+            ...currentMessages,
+            responseMessage,
+          ]);
+
+          setInputValue("");
+        }}
+      >
         <input
-          className={styles.userInput}
-          value={input}
-          placeholder="Chat with Artsy"
-          onChange={handleInputChange}
+          placeholder="Send a message..."
+          value={inputValue}
+          onChange={(event) => {
+            setInputValue(event.target.value);
+          }}
         />
       </form>
-    </main>
+    </div>
   );
 }
