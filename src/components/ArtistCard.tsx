@@ -1,30 +1,43 @@
 import styles from "./ArtistCard.module.css";
 
 interface ArtistCardProps {
-  name: string;
-  images: { url?: string; alt?: string }[];
+  artist: {
+    slug: string;
+    name: string;
+    formattedNationalityAndBirthday: string;
+    counts: { forSaleArtworks: number };
+    coverArtwork: {
+      image: { resized: { src: string; width: number; height: number } };
+    };
+  };
 }
 
-export const ArtistCard: React.FC<ArtistCardProps> = (props: any) => {
-  const { name, images } = props;
+export const ArtistCard: React.FC<ArtistCardProps> = (props) => {
+  const { artist } = props;
+  const image = artist.coverArtwork?.image.resized;
+  console.log({ props, artist, image });
   return (
     <div className={styles.container}>
-      <h1 className={styles.header}>{name}</h1>
+      <div className={styles.header}>
+        <h1>{artist.name}</h1>
+        <div className={styles.metadata}>
+          {artist.formattedNationalityAndBirthday || "  "}
+        </div>
+      </div>
       <div className={styles.content}>
         <div className={styles.images}>
-          {images.map((i: any, index: number) => (
+          {
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              key={index}
               src={
-                i.url ??
+                image?.src ??
                 `https://placehold.co/100x100/${randHex()}/${randHex()}`
               }
-              width={100}
-              height={100}
-              alt={i.alt}
+              width={200}
+              height={200}
+              alt={artist.name}
             />
-          ))}
+          }
         </div>
       </div>
     </div>

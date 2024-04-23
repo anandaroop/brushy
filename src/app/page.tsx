@@ -24,7 +24,6 @@ export default function Page() {
         ) : (
           // View messages in UI state
           messages.map((message) => {
-            console.log({ message });
             return (
               <div key={message.id} className={style.message}>
                 {message.display}
